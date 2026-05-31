@@ -2,19 +2,25 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#0a0a0a">
     <title>Serviços Feitos - Neilan Control</title>
     <link rel="icon" href="public/logo.png" type="image/png">
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay"></div>
+<header class="mobile-header" id="mobile-header"></header>
 <div class="app-layout">
     <aside id="sidebar" class="sidebar"></aside>
     <main class="main-content">
         <div class="page-header">
             <h2>Serviços Realizados</h2>
             <p>Histórico de lavagens e estéticas</p>
+        </div>
+        <div class="search-box">
+            <span class="search-icon" aria-hidden="true"></span>
+            <input type="search" id="busca-servico" placeholder="Buscar serviço, cliente ou placa..." autocomplete="off">
         </div>
         <form id="filtro-form" class="filters">
             <div class="form-group">
@@ -25,13 +31,15 @@
                 <label for="fim">Até</label>
                 <input type="date" id="fim" required>
             </div>
-            <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
-            <button type="button" id="export-btn" class="btn btn-secondary btn-sm">📥 Exportar CSV</button>
+            <button type="submit" class="btn btn-primary btn-sm btn-block-mobile">Filtrar</button>
+            <button type="button" id="export-btn" class="btn btn-secondary btn-sm btn-block-mobile">Exportar CSV</button>
         </form>
         <div id="summary-bar" class="summary-bar"></div>
         <div id="servicos-container"></div>
     </main>
 </div>
+<nav class="bottom-nav" id="bottom-nav"></nav>
+<script src="js/transitions.js"></script>
 <script src="js/config.js"></script>
 <script src="js/utils.js"></script>
 <script src="js/api.js"></script>

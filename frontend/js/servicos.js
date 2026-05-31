@@ -1,8 +1,11 @@
+let todosServicos = [];
+
 document.addEventListener('DOMContentLoaded', async () => {
     await initLayout('servicos.html');
 
     const inicioInput = document.getElementById('inicio');
     const fimInput = document.getElementById('fim');
+    const buscaInput = document.getElementById('busca-servico');
     inicioInput.value = NeilanUtils.monthStartInput();
     fimInput.value = NeilanUtils.todayInput();
 
@@ -10,6 +13,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         e.preventDefault();
         carregar();
     });
+
+    buscaInput?.addEventListener('input', () => renderLista());
 
     document.getElementById('export-btn')?.addEventListener('click', async () => {
         try {
@@ -32,32 +37,30 @@ async function carregar() {
 
     try {
         const data = await NeilanApi.get(`/api/servicos?inicio=${inicio}&fim=${fim}`);
-        document.getElementById('summary-bar').innerHTML = `
-            <span><strong>${data.quantidade}</strong> serviço(s) no período</span>
-            <span>Total: <strong>${NeilanUtils.formatMoney(data.totalPeriodo)}</strong></span>`;
-
-        const container = document.getElementById('servicos-container');
-        if (!data.servicos.length) {
-            container.innerHTML = `<div class="empty-state"><div class="icon">📋</div><p>Nenhum serviço encontrado neste período.</p></div>`;
-            return;
-        }
-
-        container.innerHTML = `
-            <div class="table-container">
-                <table>
-                    <thead><tr><th>Data/Hora</th><th>Serviço</th><th>Categoria</th><th>Cliente</th><th>Placa</th><th>Valor</th><th>Obs.</th></tr></thead>
-                    <tbody>${data.servicos.map(s => `
-                        <tr>
-                            <td>${NeilanUtils.formatDateTime(s.dataHora)}</td>
-                            <td>${NeilanUtils.escapeHtml(s.tipoServicoNome)}</td>
-                            <td><span class="badge badge-categoria">${NeilanUtils.escapeHtml(s.categoria)}</span></td>
-                            <td>${NeilanUtils.escapeHtml(s.clienteNome || '-')}</td>
-                            <td>${NeilanUtils.escapeHtml(s.placa || '-')}</td>
-                            <td class="valor">${NeilanUtils.formatMoney(s.valor)}</td>
-                            <td>${NeilanUtils.escapeHtml(s.observacoes || '-')}</td>
-                        </tr>
-                    `).join('')}</tbody>
-                </table>
-            </div>`;
+        todosServicos = data.servicos || [];
+        renderLista();
     } catch { /* */ }
+}
+
+function renderLista() {
+    const busca = document.getElementById('busca-servico')?.value || '';
+    const filtrados = NeilanUtils.filterServicos(todosServicos, busca);
+
+    const total = filtrados.reduce((sum, s) => sum + Number(s.valor || 0), 0);
+    const qtd = filtrados.length;
+
+    document.getElementById('summary-bar').innerHTML = `
+        <div class="summary-item"><span class="summary-label">Serviços</span><strong>${qtd}</strong></div>
+        <div class="summary-item"><span class="summary-label">Total</span><strong>${NeilanUtils.formatMoney(total)}</strong></div>`;
+
+    const container = document.getElementById('servicos-container');
+    if (!filtrados.length) {
+        const msg = busca.trim()
+            ? 'Nenhum serviço encontrado para esta busca.'
+            : 'Nenhum serviço encontrado neste período.';
+        container.innerHTML = `<div class="empty-state"><div class="empty-state-icon"></div><p>${msg}</p></div>`;
+        return;
+    }
+
+    container.innerHTML = NeilanUtils.renderServicoCards(filtrados);
 }

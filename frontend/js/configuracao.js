@@ -36,19 +36,39 @@ async function carregarTipos() {
         container.innerHTML = tipos.map(t => `
             <div class="config-item" data-id="${t.id}">
                 <div class="config-item-header">
-                    <h4>${NeilanUtils.escapeHtml(t.nome)}</h4>
+                    <h4 class="config-item-title">${NeilanUtils.escapeHtml(t.nome)}</h4>
                     <span class="badge ${t.ativo ? 'badge-ativo' : 'badge-inativo'}">${t.ativo ? 'Ativo' : 'Inativo'}</span>
                 </div>
                 <div class="config-form-grid">
-                    <input type="text" class="edit-nome" value="${NeilanUtils.escapeHtml(t.nome)}">
-                    <select class="edit-categoria">
-                        ${categoriaOptions(t.categoria)}
-                    </select>
-                    <input type="number" class="edit-preco" step="0.01" min="0.01" value="${t.preco}">
-                    <label class="checkbox-label"><input type="checkbox" class="edit-ativo" ${t.ativo ? 'checked' : ''}> Ativo</label>
-                    <button type="button" class="btn btn-primary btn-sm btn-salvar">Salvar</button>
+                    <div class="config-field config-field--nome">
+                        <label>Nome</label>
+                        <input type="text" class="edit-nome" value="${NeilanUtils.escapeHtml(t.nome)}" autocomplete="off">
+                    </div>
+                    <div class="config-field config-field--categoria">
+                        <label>Categoria</label>
+                        <select class="edit-categoria">${categoriaOptions(t.categoria)}</select>
+                    </div>
+                    <div class="config-form-row">
+                        <div class="config-field config-field--preco">
+                            <label>Preço</label>
+                            <div class="input-currency">
+                                <span class="input-currency-prefix" aria-hidden="true">R$</span>
+                                <input type="number" class="edit-preco" step="0.01" min="0.01" value="${t.preco}" inputmode="decimal">
+                            </div>
+                        </div>
+                        <div class="config-field config-field--status">
+                            <label>Status</label>
+                            <label class="toggle-switch" aria-label="Serviço ativo">
+                                <input type="checkbox" class="edit-ativo" ${t.ativo ? 'checked' : ''}>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="config-actions">
+                        <button type="button" class="btn btn-danger btn-excluir">Excluir</button>
+                        <button type="button" class="btn btn-primary btn-salvar">Salvar</button>
+                    </div>
                 </div>
-                <button type="button" class="btn btn-danger btn-excluir" style="margin-top:0.5rem">Excluir</button>
             </div>
         `).join('');
 

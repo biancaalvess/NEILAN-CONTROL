@@ -25,7 +25,9 @@ public class CorsConfig {
                 "http://127.0.0.1:5500",
                 "http://localhost:5500",
                 "http://127.0.0.1:3000",
-                "http://localhost:3000"
+                "http://localhost:3000",
+                "http://127.0.0.1:8090",
+                "http://localhost:8090"
         ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

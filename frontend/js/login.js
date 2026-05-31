@@ -8,9 +8,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         NeilanUtils.showAlert('alert-box', 'Sessão encerrada com sucesso.', 'success');
     }
 
-    const user = await NeilanApi.me();
+    const user = NeilanConfig.apiBase() ? null : await NeilanApi.me();
     if (user) {
-        window.location.href = 'index.html';
+        NeilanTransitions.navigate('index.html');
         return;
     }
 
@@ -23,9 +23,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         try {
             await NeilanApi.login(email, senha);
-            window.location.href = 'index.html';
-        } catch {
-            NeilanUtils.showAlert('alert-box', 'E-mail ou senha incorretos.', 'error');
+            NeilanTransitions.navigate('index.html');
+        } catch (err) {
+            const msg = err?.error || 'E-mail ou senha incorretos.';
+            NeilanUtils.showAlert('alert-box', msg, 'error');
         } finally {
             btn.disabled = false;
         }

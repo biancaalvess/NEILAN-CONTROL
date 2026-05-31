@@ -29,26 +29,12 @@ function renderUltimos(servicos) {
     if (!servicos.length) {
         container.innerHTML = `
             <div class="empty-state">
-                <div class="icon">🚗</div>
+                <div class="empty-state-icon"></div>
                 <p>Nenhum serviço registrado ainda.</p>
                 <a href="registrar.html" class="btn btn-primary" style="margin-top:1rem">Registrar primeiro serviço</a>
             </div>`;
         return;
     }
 
-    container.innerHTML = `
-        <div class="table-container">
-            <table>
-                <thead><tr><th>Data</th><th>Serviço</th><th>Cliente</th><th>Placa</th><th>Valor</th></tr></thead>
-                <tbody>${servicos.map(s => `
-                    <tr>
-                        <td>${NeilanUtils.formatDateTime(s.dataHora)}</td>
-                        <td>${NeilanUtils.escapeHtml(s.tipoServicoNome)}</td>
-                        <td>${NeilanUtils.escapeHtml(s.clienteNome || '-')}</td>
-                        <td>${NeilanUtils.escapeHtml(s.placa || '-')}</td>
-                        <td class="valor">${NeilanUtils.formatMoney(s.valor)}</td>
-                    </tr>
-                `).join('')}</tbody>
-            </table>
-        </div>`;
+    container.innerHTML = NeilanUtils.renderServicoCards(servicos, { showObs: false });
 }

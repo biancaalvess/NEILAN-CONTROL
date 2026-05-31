@@ -31,8 +31,8 @@ async function carregar() {
 
         document.getElementById('cards-grid').innerHTML = `
             <div class="card card-gold"><div class="card-label">Lucro Total</div><div class="card-value">${NeilanUtils.formatMoney(data.resumo.total)}</div></div>
-            <div class="card card-gold"><div class="card-label">Serviços Realizados</div><div class="card-value">${data.resumo.quantidade}</div></div>
-            <div class="card card-gold"><div class="card-label">Ticket Médio</div><div class="card-value">${ticket}</div></div>`;
+            <div class="card card-gold"><div class="card-label">Serviços</div><div class="card-value">${data.resumo.quantidade}</div></div>
+            <div class="card card-gold card--full-mobile"><div class="card-label">Ticket Médio</div><div class="card-value">${ticket}</div></div>`;
 
         renderRanking(data.ranking, data.resumo.total);
         renderTabela(data.servicos);
@@ -66,18 +66,5 @@ function renderTabela(servicos) {
         return;
     }
 
-    el.innerHTML = `
-        <div class="table-container">
-            <table>
-                <thead><tr><th>Data</th><th>Serviço</th><th>Cliente</th><th>Valor</th></tr></thead>
-                <tbody>${servicos.map(s => `
-                    <tr>
-                        <td>${NeilanUtils.formatDateTime(s.dataHora)}</td>
-                        <td>${NeilanUtils.escapeHtml(s.tipoServicoNome)}</td>
-                        <td>${NeilanUtils.escapeHtml(s.clienteNome || '-')}</td>
-                        <td class="valor">${NeilanUtils.formatMoney(s.valor)}</td>
-                    </tr>
-                `).join('')}</tbody>
-            </table>
-        </div>`;
+    el.innerHTML = NeilanUtils.renderServicoCards(servicos, { showObs: false });
 }

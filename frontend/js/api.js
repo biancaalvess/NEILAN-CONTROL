@@ -1,17 +1,34 @@
 const NeilanApi = (() => {
-    function getCsrfToken() {
-        const match = document.cookie.match(/XSRF-TOKEN=([^;]+)/);
-        return match ? decodeURIComponent(match[1]) : null;
+    let cachedCsrf = null;
+
+    async function fetchCsrfToken() {
+        const res = await fetch(NeilanConfig.api('/api/auth/csrf'), {
+            credentials: 'include',
+            headers: { Accept: 'application/json' }
+        });
+        if (res.status === 204 || res.status === 404) {
+            return null;
+        }
+        if (!res.ok) {
+            return null;
+        }
+        const data = await res.json();
+        cachedCsrf = data.token;
+        return cachedCsrf;
     }
 
-    async function ensureCsrf() {
-        if (!getCsrfToken()) {
-            await fetch(NeilanConfig.api('/api/auth/me'), { credentials: 'include' });
+    async function resolveCsrfToken() {
+        if (cachedCsrf) {
+            return cachedCsrf;
         }
+        return fetchCsrfToken();
+    }
+
+    function clearCsrfCache() {
+        cachedCsrf = null;
     }
 
     async function request(url, options = {}) {
-        await ensureCsrf();
         const method = (options.method || 'GET').toUpperCase();
         const headers = { ...(options.headers || {}) };
         let body = options.body;
@@ -22,8 +39,10 @@ const NeilanApi = (() => {
         }
 
         if (method !== 'GET' && method !== 'HEAD') {
-            const csrf = getCsrfToken();
-            if (csrf) headers['X-XSRF-TOKEN'] = csrf;
+            const csrf = await resolveCsrfToken();
+            if (csrf) {
+                headers['X-XSRF-TOKEN'] = csrf;
+            }
         }
 
         const response = await fetch(NeilanConfig.api(url), {
@@ -35,7 +54,7 @@ const NeilanApi = (() => {
         });
 
         if (response.status === 401 && !window.location.pathname.includes('login.html')) {
-            window.location.href = 'login.html';
+            NeilanTransitions.navigate('login.html');
             throw new Error('Não autenticado');
         }
 
@@ -45,6 +64,12 @@ const NeilanApi = (() => {
     async function parseJson(response) {
         if (response.status === 204) return null;
         const data = await response.json().catch(() => ({}));
+        if (response.status === 403) {
+            clearCsrfCache();
+            throw {
+                error: 'Falha de segurança (CSRF). Recarregue a página ou acesse http://localhost:8090/login.html'
+            };
+        }
         if (!response.ok) throw data;
         return data;
     }
@@ -62,11 +87,11 @@ const NeilanApi = (() => {
         }),
 
         login: async (email, senha) => {
-            await ensureCsrf();
+            clearCsrfCache();
+            const csrf = await resolveCsrfToken();
             const params = new URLSearchParams();
             params.append('email', email);
             params.append('senha', senha);
-            const csrf = getCsrfToken();
             const res = await fetch(NeilanConfig.api('/api/auth/login'), {
                 method: 'POST',
                 credentials: 'include',
@@ -77,13 +102,21 @@ const NeilanApi = (() => {
                 },
                 body: params
             });
-            return parseJson(res);
+            const data = await parseJson(res);
+            clearCsrfCache();
+            return data;
         },
 
-        logout: () => request('/api/auth/logout', { method: 'POST' }).then(parseJson),
+        logout: async () => {
+            const result = await request('/api/auth/logout', { method: 'POST' }).then(parseJson);
+            clearCsrfCache();
+            return result;
+        },
 
-        me: () => fetch(NeilanConfig.api('/api/auth/me'), { credentials: 'include' })
-            .then(r => r.ok ? r.json() : null),
+        me: () => fetch(NeilanConfig.api('/api/auth/me'), {
+            credentials: 'include',
+            headers: { Accept: 'application/json' }
+        }).then(r => (r.ok ? r.json() : null)),
 
         downloadCsv: async (inicio, fim) => {
             const params = new URLSearchParams();
