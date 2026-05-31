@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "https://SEU-APP.up.railway.app/$1"
+    }
+  ]
+}
