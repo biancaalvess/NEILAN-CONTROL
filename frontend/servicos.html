@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serviços Feitos - Neilan Control</title>
+    <link rel="icon" href="public/logo.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main-content">
+        <div class="page-header">
+            <h2>Serviços Realizados</h2>
+            <p>Histórico de lavagens e estéticas</p>
+        </div>
+        <form id="filtro-form" class="filters">
+            <div class="form-group">
+                <label for="inicio">De</label>
+                <input type="date" id="inicio" required>
+            </div>
+            <div class="form-group">
+                <label for="fim">Até</label>
+                <input type="date" id="fim" required>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">Filtrar</button>
+            <button type="button" id="export-btn" class="btn btn-secondary btn-sm">📥 Exportar CSV</button>
+        </form>
+        <div id="summary-bar" class="summary-bar"></div>
+        <div id="servicos-container"></div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/servicos.js"></script>
+</body>
+</html>

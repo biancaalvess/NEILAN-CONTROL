@@ -1,10 +1,15 @@
 package com.neilan.control.config;
 
+import com.neilan.control.model.Role;
 import com.neilan.control.model.TipoServico;
+import com.neilan.control.model.Usuario;
 import com.neilan.control.repository.TipoServicoRepository;
+import com.neilan.control.repository.UsuarioRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
 
@@ -12,11 +17,35 @@ import java.math.BigDecimal;
 public class DataInitializer {
 
     @Bean
-    CommandLineRunner seedServicos(TipoServicoRepository repository) {
+    CommandLineRunner seedData(TipoServicoRepository tipoRepo,
+                               UsuarioRepository usuarioRepo,
+                               PasswordEncoder passwordEncoder,
+                               @Value("${app.admin.email:neilan@estetica.com}") String adminEmail,
+                               @Value("${app.admin.password:neilan1958}") String adminPassword) {
         return args -> {
-            if (repository.count() > 0) {
-                return;
-            }
+            seedUsuario(usuarioRepo, passwordEncoder, adminEmail, adminPassword);
+            seedServicos(tipoRepo);
+        };
+    }
+
+    private void seedUsuario(UsuarioRepository repository, PasswordEncoder encoder,
+                             String email, String senhaPlana) {
+        if (repository.existsByEmailIgnoreCase(email)) {
+            return;
+        }
+        Usuario admin = new Usuario(
+                email.toLowerCase(),
+                encoder.encode(senhaPlana),
+                "Neilan",
+                Role.ADMIN
+        );
+        repository.save(admin);
+    }
+
+    private void seedServicos(TipoServicoRepository repository) {
+        if (repository.count() > 0) {
+            return;
+        }
 
             repository.save(new TipoServico(
                     "Polimento",
@@ -54,6 +83,5 @@ public class DataInitializer {
                     "Lavagens em Geral",
                     new BigDecimal("70.00")
             ));
-        };
     }
 }

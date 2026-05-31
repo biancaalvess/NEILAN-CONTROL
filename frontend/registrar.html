@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Serviço - Neilan Control</title>
+    <link rel="icon" href="public/logo.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main-content">
+        <div class="page-header">
+            <h2>Registrar Serviço</h2>
+            <p>Registre uma lavagem ou estética realizada</p>
+        </div>
+        <div id="alert-box"></div>
+        <div class="form-card">
+            <form id="registrar-form">
+                <div class="form-group">
+                    <label for="tipoServicoId">Serviço *</label>
+                    <select id="tipoServicoId" required></select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="clienteNome">Cliente</label>
+                        <input type="text" id="clienteNome" placeholder="Nome do cliente">
+                    </div>
+                    <div class="form-group">
+                        <label for="placa">Placa</label>
+                        <input type="text" id="placa" placeholder="ABC1D23" maxlength="10">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="valor">Valor (R$) *</label>
+                        <input type="number" id="valor" step="0.01" min="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="dataHora">Data e Hora</label>
+                        <input type="datetime-local" id="dataHora">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="observacoes">Observações</label>
+                    <textarea id="observacoes" placeholder="Detalhes adicionais..."></textarea>
+                </div>
+                <button type="submit" id="submit-btn" class="btn btn-primary">✓ Registrar Serviço</button>
+            </form>
+        </div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/registrar.js"></script>
+</body>
+</html>

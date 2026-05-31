@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Neilan Control</title>
+    <link rel="icon" href="public/logo.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<button class="menu-toggle" aria-label="Menu">☰</button>
+<div class="app-layout">
+    <aside id="sidebar" class="sidebar"></aside>
+    <main class="main-content">
+        <div class="page-header">
+            <h2>Dashboard</h2>
+            <p>Controle financeiro — Neilan Estética Automotiva</p>
+        </div>
+        <div id="cards-grid" class="cards-grid"></div>
+        <div class="actions-row">
+            <a href="registrar.html" class="btn btn-primary">➕ Registrar Serviço</a>
+            <a href="relatorio.html" class="btn btn-secondary">📈 Ver Relatório</a>
+        </div>
+        <hr class="section-divider">
+        <div class="page-header"><h2>Últimos Serviços</h2></div>
+        <div id="ultimos-container"></div>
+    </main>
+</div>
+<script src="js/config.js"></script>
+<script src="js/utils.js"></script>
+<script src="js/api.js"></script>
+<script src="js/layout.js"></script>
+<script src="js/index.js"></script>
+</body>
+</html>
