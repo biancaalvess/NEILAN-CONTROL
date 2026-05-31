@@ -101,6 +101,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/health",
                                 "/login.html",
                                 "/css/**",
                                 "/js/**",

@@ -34,6 +34,7 @@ public class DatabaseConfig {
             config.setUsername(extractUsername(databaseUrl));
             config.setPassword(extractPassword(databaseUrl));
             config.setMaximumPoolSize(5);
+            config.setConnectionTimeout(30000);
             return new HikariDataSource(config);
         }
 
@@ -43,7 +44,10 @@ public class DatabaseConfig {
     private String toJdbcUrl(String databaseUrl) {
         URI uri = URI.create(databaseUrl.replace("postgres://", "postgresql://"));
         String dbName = uri.getPath().replaceFirst("/", "");
-        return "jdbc:postgresql://" + uri.getHost() + ":" + uri.getPort() + "/" + dbName + "?sslmode=require";
+        String host = uri.getHost() != null ? uri.getHost() : "localhost";
+        int port = uri.getPort() > 0 ? uri.getPort() : 5432;
+        String sslMode = host.contains("railway.internal") ? "disable" : "require";
+        return "jdbc:postgresql://" + host + ":" + port + "/" + dbName + "?sslmode=" + sslMode;
     }
 
     private String extractUsername(String databaseUrl) {
