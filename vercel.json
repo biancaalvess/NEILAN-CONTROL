@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "https://SEU-APP.up.railway.app/$1"
+      "destination": "neilan-control-production.up.railway.app"
     }
   ]
 }
