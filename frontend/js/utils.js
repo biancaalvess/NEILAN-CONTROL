@@ -97,5 +97,68 @@ const NeilanUtils = {
                 ${showObs && s.observacoes ? `<p class="service-card-obs">${this.escapeHtml(s.observacoes)}</p>` : ''}
             </article>
         `).join('')}</div>`;
+    },
+
+    renderCustoCards(custos, options = {}) {
+        const showDelete = options.showDelete !== false;
+        return `<div class="service-cards">${custos.map(c => `
+            <article class="service-card service-card--expense">
+                <div class="service-card-top">
+                    <div>
+                        <div class="service-card-title">${this.escapeHtml(c.descricao)}</div>
+                        <div class="service-card-date">${this.formatDateTime(c.dataHora)}</div>
+                    </div>
+                    <div class="service-card-value service-card-value--expense">− ${this.formatMoney(c.valor)}</div>
+                </div>
+                ${c.observacoes ? `<p class="service-card-obs">${this.escapeHtml(c.observacoes)}</p>` : ''}
+                ${showDelete ? `<button type="button" class="btn btn-secondary btn-sm btn-delete-custo" data-id="${c.id}">Excluir</button>` : ''}
+            </article>
+        `).join('')}</div>`;
+    },
+
+    aggregateCustosByDescricao(custos) {
+        const map = new Map();
+        for (const c of custos) {
+            const key = (c.descricao || 'Sem descrição').trim();
+            const val = Number(c.valor) || 0;
+            const prev = map.get(key) || { nome: key, total: 0, quantidade: 0 };
+            prev.total += val;
+            prev.quantidade += 1;
+            map.set(key, prev);
+        }
+        return [...map.values()].sort((a, b) => b.total - a.total);
+    },
+
+    renderExpenseDashboard(custos, totalGeral) {
+        const total = Number(totalGeral) || 0;
+        const qtd = custos.length;
+        const agregados = this.aggregateCustosByDescricao(custos);
+
+        const metaHtml = `
+            <p class="expense-dashboard-meta">
+                <strong>${this.formatMoney(total)}</strong>
+                <span class="expense-dashboard-sep">·</span>
+                ${qtd} ${qtd === 1 ? 'lançamento' : 'lançamentos'}
+            </p>`;
+
+        if (!qtd || total <= 0) {
+            return `${metaHtml}<p class="expense-dashboard-empty">Sem gastos no período.</p>`;
+        }
+
+        const barsHtml = agregados.slice(0, 5).map(item => {
+            const pct = total > 0 ? (item.total / total * 100) : 0;
+            return `
+                <div class="expense-mini-bar">
+                    <div class="expense-mini-bar-row">
+                        <span class="expense-mini-bar-name">${this.escapeHtml(item.nome)}</span>
+                        <span class="expense-mini-bar-value">${this.formatMoney(item.total)}</span>
+                    </div>
+                    <div class="expense-mini-bar-track">
+                        <div class="expense-mini-bar-fill" style="width:${pct.toFixed(1)}%"></div>
+                    </div>
+                </div>`;
+        }).join('');
+
+        return `${metaHtml}<div class="expense-mini-bars">${barsHtml}</div>`;
     }
 };

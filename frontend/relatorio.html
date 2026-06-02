@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#0a0a0a">
-    <title>Relatório - Neilan Control</title>
+    <title>Relatórios - Neilan Control</title>
     <link rel="icon" href="public/logo.png" type="image/png">
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -15,17 +15,22 @@
     <aside id="sidebar" class="sidebar"></aside>
     <main class="main-content">
         <div class="page-header">
-            <h2 id="relatorio-titulo">Relatório</h2>
-            <p>Lucro e desempenho por período</p>
+            <h2 id="relatorio-titulo">Relatórios</h2>
+            <p id="relatorio-subtitulo">Lucro, despesas e desempenho por período</p>
         </div>
-        <div class="tabs tabs--scroll">
+        <div class="tabs tabs--scroll" id="tipo-tabs">
+            <a href="#" class="tab tab--income active" data-tipo="servicos">Serviços</a>
+            <a href="#" class="tab tab--expense" data-tipo="custos">Custos</a>
+        </div>
+        <div class="tabs tabs--scroll" id="periodo-tabs">
             <a href="#" class="tab" data-periodo="diario">Diário</a>
             <a href="#" class="tab" data-periodo="mensal">Mensal</a>
             <a href="#" class="tab" data-periodo="trimestral">Trimestral</a>
             <a href="#" class="tab" data-periodo="anual">Anual</a>
         </div>
+        <div id="alert-box"></div>
         <div id="cards-grid" class="cards-grid cards-grid--2col"></div>
-        <div class="page-header page-header--compact"><h2>Ranking por Serviço</h2></div>
+        <div class="page-header page-header--compact"><h2 id="ranking-titulo">Ranking por Serviço</h2></div>
         <div id="ranking-container" class="form-card form-card--full"></div>
         <div id="tabela-container"></div>
     </main>

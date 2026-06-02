@@ -2,7 +2,8 @@ const NAV_ITEMS = [
     { href: 'index.html', label: 'Dashboard' },
     { href: 'registrar.html', label: 'Registrar Serviço' },
     { href: 'servicos.html', label: 'Serviços Feitos' },
-    { href: 'relatorio.html', label: 'Relatório' },
+    { href: 'custos.html', label: 'Saída — Custos' },
+    { href: 'relatorio.html', label: 'Relatórios' },
     { href: 'configuracao.html', label: 'Configuração' }
 ];
 
@@ -10,7 +11,8 @@ const PAGE_TITLES = {
     'index.html': 'Dashboard',
     'registrar.html': 'Registrar',
     'servicos.html': 'Serviços',
-    'relatorio.html': 'Relatório',
+    'custos.html': 'Custos',
+    'relatorio.html': 'Relatórios',
     'configuracao.html': 'Configuração'
 };
 
@@ -18,7 +20,8 @@ const BOTTOM_NAV = [
     { href: 'index.html', label: 'Início' },
     { href: 'registrar.html', label: 'Registrar' },
     { href: 'servicos.html', label: 'Histórico' },
-    { href: 'relatorio.html', label: 'Relatório' },
+    { href: 'custos.html', label: 'Custos' },
+    { href: 'relatorio.html', label: 'Relatórios' },
     { href: 'configuracao.html', label: 'Config' }
 ];
 
@@ -72,7 +75,7 @@ async function initLayout(activePath) {
     const bottomNav = document.getElementById('bottom-nav');
     if (bottomNav) {
         bottomNav.innerHTML = BOTTOM_NAV.map(item => `
-            <a href="${item.href}" class="bottom-nav-item ${activePath === item.href ? 'active' : ''}">
+            <a href="${item.href}" class="bottom-nav-item ${activePath === item.href || (item.href === 'relatorio.html' && activePath.startsWith('relatorio')) ? 'active' : ''}">
                 <span class="bottom-nav-label">${item.label}</span>
             </a>
         `).join('');

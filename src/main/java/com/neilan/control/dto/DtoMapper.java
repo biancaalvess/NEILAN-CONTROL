@@ -1,5 +1,6 @@
 package com.neilan.control.dto;
 
+import com.neilan.control.model.Custo;
 import com.neilan.control.model.ServicoRealizado;
 import com.neilan.control.model.TipoServico;
 
@@ -25,6 +26,16 @@ public final class DtoMapper {
                 s.getValor(),
                 s.getDataHora(),
                 s.getObservacoes()
+        );
+    }
+
+    public static CustoDto toDto(Custo c) {
+        return new CustoDto(
+                c.getId(),
+                c.getDescricao(),
+                c.getValor(),
+                c.getDataHora(),
+                c.getObservacoes()
         );
     }
 }

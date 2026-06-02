@@ -1,8 +1,10 @@
 package com.neilan.control.service;
 
 import com.neilan.control.dto.ResumoLucro;
+import com.neilan.control.model.Custo;
 import com.neilan.control.model.ServicoRealizado;
 import com.neilan.control.model.TipoServico;
+import com.neilan.control.repository.CustoRepository;
 import com.neilan.control.repository.ServicoRealizadoRepository;
 import com.neilan.control.repository.TipoServicoRepository;
 import org.springframework.stereotype.Service;
@@ -27,11 +29,14 @@ public class FinanceiroService {
 
     private final ServicoRealizadoRepository servicoRepository;
     private final TipoServicoRepository tipoServicoRepository;
+    private final CustoRepository custoRepository;
 
     public FinanceiroService(ServicoRealizadoRepository servicoRepository,
-                             TipoServicoRepository tipoServicoRepository) {
+                             TipoServicoRepository tipoServicoRepository,
+                             CustoRepository custoRepository) {
         this.servicoRepository = servicoRepository;
         this.tipoServicoRepository = tipoServicoRepository;
+        this.custoRepository = custoRepository;
     }
 
     public List<ResumoLucro> calcularResumos() {
@@ -50,6 +55,35 @@ public class FinanceiroService {
         BigDecimal total = servicoRepository.sumValorBetween(inicio, fim);
         long qtd = servicoRepository.countBetween(inicio, fim);
         return new ResumoLucro(label, total, qtd);
+    }
+
+    public ResumoLucro resumoCustoPeriodo(String label, LocalDateTime inicio, LocalDateTime fim) {
+        BigDecimal total = custoRepository.sumValorBetween(inicio, fim);
+        long qtd = custoRepository.countBetween(inicio, fim);
+        return new ResumoLucro(label, total, qtd);
+    }
+
+    public List<Map<String, Object>> rankingCustos(LocalDateTime inicio, LocalDateTime fim) {
+        List<Object[]> rows = custoRepository.sumByDescricaoBetween(inicio, fim);
+        List<Map<String, Object>> ranking = new ArrayList<>();
+        BigDecimal totalGeral = custoRepository.sumValorBetween(inicio, fim);
+
+        for (Object[] row : rows) {
+            Map<String, Object> item = new LinkedHashMap<>();
+            BigDecimal total = (BigDecimal) row[1];
+            item.put("nome", row[0]);
+            item.put("total", total);
+            item.put("quantidade", row[2]);
+            if (totalGeral.compareTo(BigDecimal.ZERO) > 0) {
+                item.put("percentual", total.multiply(BigDecimal.valueOf(100))
+                        .divide(totalGeral, 1, java.math.RoundingMode.HALF_UP));
+            } else {
+                item.put("percentual", BigDecimal.ZERO);
+            }
+            ranking.add(item);
+        }
+
+        return ranking;
     }
 
     public List<Map<String, Object>> rankingServicos(LocalDateTime inicio, LocalDateTime fim) {
@@ -125,6 +159,34 @@ public class FinanceiroService {
     public List<ServicoRealizado> listarServicosPorPeriodo(LocalDate inicio, LocalDate fim) {
         return servicoRepository.findByDataHoraBetweenOrderByDataHoraDesc(
                 inicio.atStartOfDay(), fim.atTime(LocalTime.MAX));
+    }
+
+    @Transactional
+    public Custo registrarCusto(String descricao, BigDecimal valor, LocalDateTime dataHora, String observacoes) {
+        if (descricao == null || descricao.isBlank()) {
+            throw new IllegalArgumentException("Descrição é obrigatória");
+        }
+
+        Custo custo = new Custo();
+        custo.setDescricao(descricao.trim());
+        custo.setValor(valor);
+        custo.setDataHora(dataHora != null ? dataHora : LocalDateTime.now());
+        custo.setObservacoes(observacoes != null ? observacoes.trim() : null);
+
+        return custoRepository.save(custo);
+    }
+
+    public List<Custo> listarCustosPorPeriodo(LocalDate inicio, LocalDate fim) {
+        return custoRepository.findByDataHoraBetweenOrderByDataHoraDesc(
+                inicio.atStartOfDay(), fim.atTime(LocalTime.MAX));
+    }
+
+    @Transactional
+    public void excluirCusto(Long id) {
+        if (!custoRepository.existsById(id)) {
+            throw new IllegalArgumentException("Custo não encontrado");
+        }
+        custoRepository.deleteById(id);
     }
 
     public String gerarCsv(LocalDate inicio, LocalDate fim) {
