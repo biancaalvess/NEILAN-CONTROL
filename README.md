@@ -20,11 +20,6 @@ O Maven copia `frontend/` para `static/` no build. Um único JAR serve as págin
 | **Front** | `frontend/` | Telas, estilos, chamadas `fetch` à API |
 | **Back** | `src/main/java/` | Regras de negócio, banco, segurança |
 
-## Login
-
-- **E-mail:** `neilan@estetica.com`
-- **Senha:** `neilan1958`
-
 ## Funcionalidades
 
 - Registrar serviços, histórico, lucro diário/mensal/trimestral/anual
