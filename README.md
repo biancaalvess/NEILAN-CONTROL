@@ -48,9 +48,20 @@ Acesse: http://localhost:8080/login.html
 
 ## Deploy
 
-**Railway:** conecte o repo, adicione PostgreSQL, `SPRING_PROFILES_ACTIVE=prod`.
+**Banco:** [Neon](https://neon.tech) PostgreSQL (`sslmode=require`).
+
+**Railway (API):** conecte o repo e defina no serviço da aplicação (não no Postgres antigo):
+
+| Variável | Valor |
+|----------|--------|
+| `SPRING_PROFILES_ACTIVE` | `prod` |
+| `DATABASE_URL` | `postgresql://USER:PASSWORD@HOST/neondb?sslmode=require` |
+
+Remova referências `${{Postgres.*}}` do banco Railway antigo no serviço da API. O Postgres antigo pode ficar pausado até confirmação de exclusão.
 
 **Vercel:** use `vercel.json` como proxy para o domínio Railway (Java não roda no Vercel).
+
+Veja `.env.example` para o formato das variáveis (sem secrets).
 
 ---
 
