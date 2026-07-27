@@ -46,8 +46,10 @@ public class DatabaseConfig {
         String dbName = uri.getPath().replaceFirst("/", "");
         String host = uri.getHost() != null ? uri.getHost() : "localhost";
         int port = uri.getPort() > 0 ? uri.getPort() : 5432;
+        // Neon / hosts públicos: ssl obrigatório. Host interno Railway: disable.
+        String pathDb = dbName.contains("?") ? dbName.substring(0, dbName.indexOf('?')) : dbName;
         String sslMode = host.contains("railway.internal") ? "disable" : "require";
-        return "jdbc:postgresql://" + host + ":" + port + "/" + dbName + "?sslmode=" + sslMode;
+        return "jdbc:postgresql://" + host + ":" + port + "/" + pathDb + "?sslmode=" + sslMode;
     }
 
     private String extractUsername(String databaseUrl) {
