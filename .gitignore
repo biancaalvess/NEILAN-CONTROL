@@ -7,3 +7,6 @@ target/
 .settings/
 *.log
 .env
+
+backups/
+*.backup
