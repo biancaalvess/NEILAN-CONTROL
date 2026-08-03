@@ -2,7 +2,7 @@ export const config = {
     runtime: 'edge'
 };
 
-const BACKEND = (process.env.RAILWAY_BACKEND_URL || 'https://neilan-control-production.up.railway.app')
+const BACKEND = (process.env.RAILWAY_BACKEND_URL || 'https://neilan-control.onrender.com')
     .replace(/\/$/, '');
 
 export default async function handler(request) {
