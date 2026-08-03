@@ -18,28 +18,48 @@ public class DatabaseConfig {
     @Value("${SPRING_DATASOURCE_URL:${DATABASE_URL:}}")
     private String databaseUrl;
 
+    @Value("${SPRING_DATASOURCE_USERNAME:${DATABASE_USERNAME:}}")
+    private String defaultUsername;
+
+    @Value("${SPRING_DATASOURCE_PASSWORD:${DATABASE_PASSWORD:}}")
+    private String defaultPassword;
+
     @Bean
     public DataSource dataSource() throws URISyntaxException {
-        // Se a URL começar com "jdbc:", limpa o prefixo para tratar o URI
-        String cleanUrl = databaseUrl.startsWith("jdbc:") ? databaseUrl.substring(5) : databaseUrl;
-        
-        URI dbUri = new URI(cleanUrl);
+        HikariConfig config = new HikariConfig();
+        config.setDriverClassName("org.postgresql.Driver");
 
-        String username = dbUri.getUserInfo().split(":")[0];
-        String password = dbUri.getUserInfo().split(":")[1];
-        
-        int port = dbUri.getPort() == -1 ? 5432 : dbUri.getPort();
-        String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
-        
-        if (dbUri.getQuery() != null) {
-            dbUrl += "?" + dbUri.getQuery();
+        String cleanUrl = databaseUrl.trim();
+        if (cleanUrl.startsWith("jdbc:")) {
+            cleanUrl = cleanUrl.substring(5);
         }
 
-        HikariConfig config = new HikariConfig();
-        config.setJdbcUrl(dbUrl);
+        URI dbUri = new URI(cleanUrl);
+
+        String username = defaultUsername;
+        String password = defaultPassword;
+
+        // Extrai credenciais da URL se existirem no formato user:pass
+        if (dbUri.getUserInfo() != null) {
+            String[] userInfo = dbUri.getUserInfo().split(":");
+            if (userInfo.length > 0 && !userInfo[0].isEmpty()) {
+                username = userInfo[0];
+            }
+            if (userInfo.length > 1 && !userInfo[1].isEmpty()) {
+                password = userInfo[1];
+            }
+        }
+
+        int port = dbUri.getPort() == -1 ? 5432 : dbUri.getPort();
+        String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
+
+        if (dbUri.getQuery() != null) {
+            jdbcUrl += "?" + dbUri.getQuery();
+        }
+
+        config.setJdbcUrl(jdbcUrl);
         config.setUsername(username);
         config.setPassword(password);
-        config.setDriverClassName("org.postgresql.Driver");
 
         return new HikariDataSource(config);
     }
