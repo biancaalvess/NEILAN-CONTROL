@@ -2,12 +2,12 @@ export const config = {
     runtime: 'edge'
 };
 
-const BACKEND = process.env.RAILWAY_BACKEND_URL
-    || 'https://neilan-control-production.up.railway.app';
+const BACKEND = (process.env.RAILWAY_BACKEND_URL || 'https://neilan-control-production.up.railway.app')
+    .replace(/\/$/, '');
 
 export default async function handler(request) {
     const url = new URL(request.url);
-    const targetUrl = BACKEND + url.pathname + url.search;
+    const targetUrl = `${BACKEND}${url.pathname}${url.search}`;
 
     const headers = new Headers(request.headers);
     headers.delete('host');
@@ -24,5 +24,21 @@ export default async function handler(request) {
         init.body = request.body;
     }
 
-    return fetch(targetUrl, init);
+    try {
+        const response = await fetch(targetUrl, init);
+        return new Response(response.body, {
+            status: response.status,
+            statusText: response.statusText,
+            headers: response.headers
+        });
+    } catch (error) {
+        return new Response(JSON.stringify({
+            error: 'Backend indisponível',
+            detail: error.message,
+            backend: BACKEND
+        }), {
+            status: 502,
+            headers: { 'Content-Type': 'application/json' }
+        });
+    }
 }

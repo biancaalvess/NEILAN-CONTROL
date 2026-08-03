@@ -16,19 +16,23 @@ public class CorsConfig {
     @Bean
     CorsConfigurationSource corsConfigurationSource(Environment environment) {
         boolean isLocal = Arrays.asList(environment.getActiveProfiles()).contains("local");
-        if (!isLocal) {
-            return request -> null;
-        }
 
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of(
-                "http://127.0.0.1:5500",
-                "http://localhost:5500",
-                "http://127.0.0.1:3000",
-                "http://localhost:3000",
-                "http://127.0.0.1:8090",
-                "http://localhost:8090"
-        ));
+        if (isLocal) {
+            config.setAllowedOrigins(List.of(
+                    "http://127.0.0.1:5500",
+                    "http://localhost:5500",
+                    "http://127.0.0.1:3000",
+                    "http://localhost:3000",
+                    "http://127.0.0.1:8090",
+                    "http://localhost:8090"
+            ));
+        } else {
+            config.setAllowedOriginPatterns(List.of(
+                    "https://*.vercel.app",
+                    "https://neilan-control.vercel.app"
+            ));
+        }
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);

@@ -11,6 +11,7 @@ public record ServicoRequest(
         String clienteNome,
         String placa,
         @NotNull @DecimalMin("0.01") BigDecimal valor,
+        @DecimalMin("0.00") BigDecimal custoInsumos,
         LocalDateTime dataHora,
         String observacoes
 ) {

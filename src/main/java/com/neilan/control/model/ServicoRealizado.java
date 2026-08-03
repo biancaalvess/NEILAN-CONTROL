@@ -31,6 +31,12 @@ public class ServicoRealizado {
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal valor;
 
+    /** Custo de peças/insumos consumidos neste serviço (custo operacional direto). */
+    @NotNull
+    @DecimalMin("0.00")
+    @Column(name = "custo_insumos", nullable = false, precision = 10, scale = 2)
+    private BigDecimal custoInsumos = BigDecimal.ZERO;
+
     @NotNull
     @Column(nullable = false)
     private LocalDateTime dataHora;
@@ -79,6 +85,18 @@ public class ServicoRealizado {
 
     public void setValor(BigDecimal valor) {
         this.valor = valor;
+    }
+
+    public BigDecimal getCustoInsumos() {
+        return custoInsumos;
+    }
+
+    public void setCustoInsumos(BigDecimal custoInsumos) {
+        this.custoInsumos = custoInsumos != null ? custoInsumos : BigDecimal.ZERO;
+    }
+
+    public BigDecimal getValorTotal() {
+        return valor;
     }
 
     public LocalDateTime getDataHora() {

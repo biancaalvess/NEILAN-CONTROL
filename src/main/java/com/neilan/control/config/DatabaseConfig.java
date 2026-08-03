@@ -54,10 +54,21 @@ public class DatabaseConfig {
         String jdbcUrl = "jdbc:postgresql://" + dbUri.getHost() + ":" + port + dbUri.getPath();
 
         if (dbUri.getQuery() != null) {
-            jdbcUrl += "?" + dbUri.getQuery();
+            String query = java.util.Arrays.stream(dbUri.getQuery().split("&"))
+                    .filter(part -> !part.startsWith("channel_binding="))
+                    .reduce((a, b) -> a + "&" + b)
+                    .orElse("");
+            if (!query.isEmpty()) {
+                jdbcUrl += "?" + query;
+            }
+        } else {
+            jdbcUrl += "?sslmode=require";
         }
 
         config.setJdbcUrl(jdbcUrl);
+        config.setMaximumPoolSize(5);
+        config.setConnectionTimeout(60_000);
+        config.setInitializationFailTimeout(60_000);
         config.setUsername(username);
         config.setPassword(password);
 

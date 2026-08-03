@@ -16,11 +16,7 @@
     <main class="main-content">
         <div class="page-header">
             <h2 id="relatorio-titulo">Relatórios</h2>
-            <p id="relatorio-subtitulo">Lucro, despesas e desempenho por período</p>
-        </div>
-        <div class="tabs tabs--scroll" id="tipo-tabs">
-            <a href="#" class="tab tab--income active" data-tipo="servicos">Serviços</a>
-            <a href="#" class="tab tab--expense" data-tipo="custos">Custos</a>
+            <p id="relatorio-subtitulo">DRE simplificada — receita, custos e lucro líquido</p>
         </div>
         <div class="tabs tabs--scroll" id="periodo-tabs">
             <a href="#" class="tab" data-periodo="diario">Diário</a>
@@ -30,9 +26,13 @@
         </div>
         <div id="alert-box"></div>
         <div id="cards-grid" class="cards-grid cards-grid--2col"></div>
-        <div class="page-header page-header--compact"><h2 id="ranking-titulo">Ranking por Serviço</h2></div>
-        <div id="ranking-container" class="form-card form-card--full"></div>
-        <div id="tabela-container"></div>
+        <div id="dre-detalhes" class="form-card form-card--full"></div>
+        <div class="page-header page-header--compact"><h2>Detalhamento por período</h2></div>
+        <div id="tabela-dre" class="form-card form-card--full"></div>
+        <div class="page-header page-header--compact"><h2>Ranking por Serviço</h2></div>
+        <div id="ranking-servicos" class="form-card form-card--full"></div>
+        <div class="page-header page-header--compact"><h2>Ranking por Custo</h2></div>
+        <div id="ranking-custos" class="form-card form-card--full"></div>
     </main>
 </div>
 <nav class="bottom-nav" id="bottom-nav"></nav>

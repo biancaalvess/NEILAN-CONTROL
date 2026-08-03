@@ -67,6 +67,7 @@ public class ServicoApiController {
                     request.clienteNome(),
                     request.placa(),
                     request.valor(),
+                    request.custoInsumos(),
                     request.dataHora(),
                     request.observacoes()
             );

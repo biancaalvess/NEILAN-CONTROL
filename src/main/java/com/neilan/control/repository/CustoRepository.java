@@ -1,5 +1,6 @@
 package com.neilan.control.repository;
 
+import com.neilan.control.dto.AgregacaoCustoProjection;
 import com.neilan.control.model.Custo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,32 @@ public interface CustoRepository extends JpaRepository<Custo, Long> {
             ORDER BY SUM(c.valor) DESC
             """)
     List<Object[]> sumByDescricaoBetween(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+
+    @Query("""
+            SELECT
+                YEAR(c.dataHora) AS ano,
+                MONTH(c.dataHora) AS mes,
+                DAY(c.dataHora) AS dia,
+                COALESCE(SUM(c.valor), 0) AS total,
+                COUNT(c) AS quantidade
+            FROM Custo c
+            WHERE c.dataHora BETWEEN :inicio AND :fim
+            GROUP BY YEAR(c.dataHora), MONTH(c.dataHora), DAY(c.dataHora)
+            ORDER BY YEAR(c.dataHora), MONTH(c.dataHora), DAY(c.dataHora)
+            """)
+    List<AgregacaoCustoProjection> agregarPorDia(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
+
+    @Query("""
+            SELECT
+                YEAR(c.dataHora) AS ano,
+                MONTH(c.dataHora) AS mes,
+                1 AS dia,
+                COALESCE(SUM(c.valor), 0) AS total,
+                COUNT(c) AS quantidade
+            FROM Custo c
+            WHERE c.dataHora BETWEEN :inicio AND :fim
+            GROUP BY YEAR(c.dataHora), MONTH(c.dataHora)
+            ORDER BY YEAR(c.dataHora), MONTH(c.dataHora)
+            """)
+    List<AgregacaoCustoProjection> agregarPorMes(@Param("inicio") LocalDateTime inicio, @Param("fim") LocalDateTime fim);
 }

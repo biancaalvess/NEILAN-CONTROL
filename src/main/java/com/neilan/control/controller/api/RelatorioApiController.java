@@ -3,7 +3,9 @@ package com.neilan.control.controller.api;
 import com.neilan.control.dto.DtoMapper;
 import com.neilan.control.dto.RelatorioCustosDto;
 import com.neilan.control.dto.RelatorioDto;
+import com.neilan.control.dto.RelatorioFinanceiroDto;
 import com.neilan.control.service.FinanceiroService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -26,13 +28,20 @@ public class RelatorioApiController {
         this.financeiroService = financeiroService;
     }
 
+    @GetMapping("/financeiro")
+    public RelatorioFinanceiroDto relatorioFinanceiro(@RequestParam(defaultValue = "mensal") String periodo) {
+        PeriodoInfo info = resolverPeriodo(periodo);
+        return financeiroService.montarRelatorioFinanceiro(
+                info.periodo(), info.titulo(), info.inicio(), info.fim());
+    }
+
     @GetMapping("/servicos")
     public RelatorioDto relatorioServicos(@RequestParam(defaultValue = "mensal") String periodo) {
         PeriodoInfo info = resolverPeriodo(periodo);
         return new RelatorioDto(
                 info.periodo(),
                 info.titulo(),
-                financeiroService.resumoPeriodo(info.periodo(), info.inicio(), info.fim()),
+                financeiroService.resumoLucroPeriodo(info.periodo(), info.inicio(), info.fim()),
                 financeiroService.rankingServicos(info.inicio(), info.fim()),
                 financeiroService.listarServicosPorPeriodo(info.inicio().toLocalDate(), info.fim().toLocalDate())
                         .stream()
@@ -56,10 +65,10 @@ public class RelatorioApiController {
         );
     }
 
-    /** @deprecated use /api/relatorio/servicos */
+    /** @deprecated use /api/relatorio/financeiro */
     @GetMapping
-    public RelatorioDto relatorio(@RequestParam(defaultValue = "mensal") String periodo) {
-        return relatorioServicos(periodo);
+    public RelatorioFinanceiroDto relatorio(@RequestParam(defaultValue = "mensal") String periodo) {
+        return relatorioFinanceiro(periodo);
     }
 
     private PeriodoInfo resolverPeriodo(String periodo) {

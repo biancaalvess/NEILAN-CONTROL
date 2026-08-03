@@ -1,23 +1,10 @@
-let tipoAtual = 'servicos';
 let periodoAtual = 'mensal';
 
 document.addEventListener('DOMContentLoaded', async () => {
     await initLayout('relatorio.html');
 
     const params = new URLSearchParams(window.location.search);
-    tipoAtual = params.get('tipo') === 'custos' ? 'custos' : 'servicos';
     periodoAtual = params.get('periodo') || 'mensal';
-
-    document.querySelectorAll('#tipo-tabs .tab').forEach(tab => {
-        tab.classList.toggle('active', tab.dataset.tipo === tipoAtual);
-        tab.addEventListener('click', (e) => {
-            e.preventDefault();
-            tipoAtual = tab.dataset.tipo;
-            syncUrl();
-            syncTabs();
-            carregar();
-        });
-    });
 
     document.querySelectorAll('#periodo-tabs .tab').forEach(tab => {
         tab.classList.toggle('active', tab.dataset.periodo === periodoAtual);
@@ -34,83 +21,124 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 function syncUrl() {
-    window.history.replaceState({}, '', `?tipo=${tipoAtual}&periodo=${periodoAtual}`);
+    window.history.replaceState({}, '', `?periodo=${periodoAtual}`);
 }
 
 function syncTabs() {
-    document.querySelectorAll('#tipo-tabs .tab').forEach(t =>
-        t.classList.toggle('active', t.dataset.tipo === tipoAtual));
     document.querySelectorAll('#periodo-tabs .tab').forEach(t =>
         t.classList.toggle('active', t.dataset.periodo === periodoAtual));
-    document.getElementById('ranking-titulo').textContent =
-        tipoAtual === 'custos' ? 'Ranking por Descrição' : 'Ranking por Serviço';
 }
 
 async function carregar() {
     syncTabs();
-    const endpoint = tipoAtual === 'custos'
-        ? `/api/relatorio/custos?periodo=${periodoAtual}`
-        : `/api/relatorio/servicos?periodo=${periodoAtual}`;
 
     try {
-        const data = await NeilanApi.get(endpoint);
+        const data = await NeilanApi.get(`/api/relatorio/financeiro?periodo=${periodoAtual}`);
         document.getElementById('relatorio-titulo').textContent = data.titulo;
         document.getElementById('relatorio-subtitulo').textContent =
-            tipoAtual === 'custos'
-                ? 'Despesas e gastos no período selecionado'
-                : 'Lucro e desempenho no período selecionado';
+            'DRE simplificada — receita, custos e lucro líquido no período';
 
-        if (tipoAtual === 'custos') {
-            renderCustos(data);
-        } else {
-            renderServicos(data);
-        }
+        renderDre(data);
+        renderRanking(data.rankingServicos, data.dre.receitaBruta, false, 'ranking-servicos');
+        renderRanking(data.rankingCustos, data.dre.custosFixosVariaveis, true, 'ranking-custos');
     } catch (err) {
         NeilanUtils.showAlert('alert-box', err.message || err.error || 'Erro ao carregar relatório', 'error');
     }
 }
 
-function renderServicos(data) {
-    const ticket = data.resumo.quantidade > 0
-        ? NeilanUtils.formatMoney(Number(data.resumo.total) / data.resumo.quantidade)
-        : NeilanUtils.formatMoney(0);
+function renderDre(data) {
+    const dre = data.dre;
+    const margem = Number(dre.margemPercentual || 0);
+    const margemClass = margem >= 0 ? '' : 'card-value--expense';
 
     document.getElementById('cards-grid').innerHTML = `
-        <div class="card card-gold"><div class="card-label">Lucro Total</div><div class="card-value">${NeilanUtils.formatMoney(data.resumo.total)}</div></div>
-        <div class="card card-gold"><div class="card-label">Serviços</div><div class="card-value">${data.resumo.quantidade}</div></div>
-        <div class="card card-gold card--full-mobile"><div class="card-label">Ticket Médio</div><div class="card-value">${ticket}</div></div>`;
+        <div class="card card-gold">
+            <div class="card-label">Receita Bruta</div>
+            <div class="card-value">${NeilanUtils.formatMoney(dre.receitaBruta)}</div>
+        </div>
+        <div class="card card-expense">
+            <div class="card-label">Custos Totais</div>
+            <div class="card-value card-value--expense">${NeilanUtils.formatMoney(dre.custosTotais)}</div>
+        </div>
+        <div class="card card-gold">
+            <div class="card-label">Lucro Líquido</div>
+            <div class="card-value ${Number(dre.lucroLiquido) < 0 ? 'card-value--expense' : ''}">${NeilanUtils.formatMoney(dre.lucroLiquido)}</div>
+        </div>
+        <div class="card card-gold card--full-mobile">
+            <div class="card-label">Margem %</div>
+            <div class="card-value ${margemClass}">${margem.toFixed(1)}%</div>
+        </div>`;
 
-    renderRanking(data.ranking, data.resumo.total, false);
+    document.getElementById('dre-detalhes').innerHTML = `
+        <div class="summary-bar summary-bar--dre">
+            <div class="summary-item">
+                <span class="summary-label">Custo operacional direto (insumos)</span>
+                <strong class="text-expense">${NeilanUtils.formatMoney(dre.custoOperacionalDireto)}</strong>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Custos fixos / variáveis</span>
+                <strong class="text-expense">${NeilanUtils.formatMoney(dre.custosFixosVariaveis)}</strong>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Serviços no período</span>
+                <strong>${dre.quantidadeServicos}</strong>
+            </div>
+            <div class="summary-item">
+                <span class="summary-label">Lançamentos de custo</span>
+                <strong>${dre.quantidadeCustos}</strong>
+            </div>
+        </div>`;
 
-    const el = document.getElementById('tabela-container');
-    el.innerHTML = data.servicos?.length
-        ? NeilanUtils.renderServicoCards(data.servicos, { showObs: false })
-        : '';
+    renderTabelaDre(data.linhas || []);
 }
 
-function renderCustos(data) {
-    const media = data.resumo.quantidade > 0
-        ? NeilanUtils.formatMoney(Number(data.resumo.total) / data.resumo.quantidade)
-        : NeilanUtils.formatMoney(0);
+function renderTabelaDre(linhas) {
+    const el = document.getElementById('tabela-dre');
+    if (!linhas.length) {
+        el.innerHTML = '<div class="empty-state"><p>Sem movimentação financeira neste período.</p></div>';
+        return;
+    }
 
-    document.getElementById('cards-grid').innerHTML = `
-        <div class="card card-expense"><div class="card-label">Total Saídas</div><div class="card-value card-value--expense">${NeilanUtils.formatMoney(data.resumo.total)}</div></div>
-        <div class="card card-expense"><div class="card-label">Lançamentos</div><div class="card-value card-value--expense">${data.resumo.quantidade}</div></div>
-        <div class="card card-expense card--full-mobile"><div class="card-label">Média por Lançamento</div><div class="card-value card-value--expense">${media}</div></div>`;
-
-    renderRanking(data.ranking, data.resumo.total, true);
-
-    const el = document.getElementById('tabela-container');
-    el.innerHTML = data.custos?.length
-        ? NeilanUtils.renderCustoCards(data.custos, { showDelete: false })
-        : '';
+    el.innerHTML = `
+        <div class="table-responsive">
+            <table class="data-table data-table--dre">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Receita</th>
+                        <th>Insumos</th>
+                        <th>Custos fixos/var.</th>
+                        <th>Custos totais</th>
+                        <th>Lucro</th>
+                        <th>Margem</th>
+                        <th>Serviços</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${linhas.map(l => {
+                        const lucroNegativo = Number(l.lucroLiquido) < 0;
+                        return `
+                        <tr>
+                            <td>${NeilanUtils.escapeHtml(l.periodoLabel)}</td>
+                            <td>${NeilanUtils.formatMoney(l.receitaBruta)}</td>
+                            <td class="text-expense">${NeilanUtils.formatMoney(l.custoOperacionalDireto)}</td>
+                            <td class="text-expense">${NeilanUtils.formatMoney(l.custosFixosVariaveis)}</td>
+                            <td class="text-expense">${NeilanUtils.formatMoney(l.custosTotais)}</td>
+                            <td class="${lucroNegativo ? 'text-expense' : ''}">${NeilanUtils.formatMoney(l.lucroLiquido)}</td>
+                            <td>${Number(l.margemPercentual || 0).toFixed(1)}%</td>
+                            <td>${l.quantidadeServicos}</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>`;
 }
 
-function renderRanking(ranking, totalGeral, isExpense) {
-    const el = document.getElementById('ranking-container');
+function renderRanking(ranking, totalGeral, isExpense, containerId) {
+    const el = document.getElementById(containerId);
     const vazio = isExpense ? 'Sem custos neste período.' : 'Sem serviços neste período.';
 
-    if (!ranking.length) {
+    if (!ranking?.length) {
         el.innerHTML = `<div class="empty-state"><p>${vazio}</p></div>`;
         return;
     }
