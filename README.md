@@ -50,18 +50,16 @@ Acesse: http://localhost:8080/login.html
 
 **Banco:** [Neon](https://neon.tech) PostgreSQL (`sslmode=require`).
 
-**Railway (API):** conecte o repo e defina no serviço da aplicação (não no Postgres antigo):
+**Render (API):** backend em `https://neilan-control.onrender.com`. Variáveis no serviço:
 
 | Variável | Valor |
 |----------|--------|
 | `SPRING_PROFILES_ACTIVE` | `prod` |
 | `DATABASE_URL` | `postgresql://USER:PASSWORD@HOST/neondb?sslmode=require` |
 
-Remova referências `${{Postgres.*}}` do banco Railway antigo no serviço da API. O Postgres antigo pode ficar pausado até confirmação de exclusão.
+**Vercel (front):** estático em `frontend/`. O `vercel.json` faz proxy de `/api/*` para o Render (Java não roda na Vercel).
 
-**Vercel:** use `vercel.json` como proxy para o domínio Railway (Java não roda no Vercel).
-
-Veja `.env.example` para o formato das variáveis (sem secrets).
+Veja `.env.example` e `render.yaml` para o formato das variáveis (sem secrets).
 
 ---
 
