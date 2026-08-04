@@ -2,7 +2,8 @@ export const config = {
     runtime: 'edge'
 };
 
-const BACKEND = (process.env.RAILWAY_BACKEND_URL || 'https://neilan-control.onrender.com')
+/** Fallback legado — produção usa rewrite externo no vercel.json para o Render. */
+const BACKEND = (process.env.BACKEND_URL || process.env.RAILWAY_BACKEND_URL || 'https://neilan-control.onrender.com')
     .replace(/\/$/, '');
 
 export default async function handler(request) {
