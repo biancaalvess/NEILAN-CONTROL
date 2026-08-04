@@ -1,28 +1,23 @@
+# Neon = banco | Render = API Java | Vercel = frontend (vercel.json)
 services:
   - type: web
     name: neilan-control
-    env: docker
+    runtime: docker
     plan: free
     region: oregon
-    dockerfilePath: Dockerfile
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
     healthCheckPath: /health
     envVars:
       - key: PORT
-        value: 8080
+        value: "8080"
       - key: SPRING_PROFILES_ACTIVE
         value: prod
-      - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://${DATABASE_HOST}:${DATABASE_PORT}/${DATABASE_NAME}
-      - key: SPRING_DATASOURCE_USERNAME
-        value: ${DATABASE_USER}
-      - key: SPRING_DATASOURCE_PASSWORD
-        value: ${DATABASE_PASSWORD}
-      - key: JWT_SECRET
-        generateValue: true
-
-databases:
-  - name: neilan-control-db
-    databaseName: neilan_control
-    user: neilan_user
-    plan: free
-    region: oregon
+      # Neon: cole a connection string (postgresql://user:pass@host/db?sslmode=require)
+      # Não use DATABASE_HOST/PORT — o app lê DATABASE_URL.
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false

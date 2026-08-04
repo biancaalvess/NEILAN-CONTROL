@@ -50,12 +50,20 @@ Acesse: http://localhost:8080/login.html
 
 **Banco:** [Neon](https://neon.tech) PostgreSQL (`sslmode=require`).
 
-**Render (API):** backend em `https://neilan-control.onrender.com`. Variáveis no serviço:
+**Render (API):** backend em `https://neilan-control.onrender.com`.
+
+No Dashboard do serviço, defina (Environment):
 
 | Variável | Valor |
 |----------|--------|
 | `SPRING_PROFILES_ACTIVE` | `prod` |
+| `PORT` | `8080` |
 | `DATABASE_URL` | `postgresql://USER:PASSWORD@HOST/neondb?sslmode=require` |
+| `ADMIN_EMAIL` / `ADMIN_PASSWORD` | login admin |
+
+**Importante:** remova variáveis antigas `SPRING_DATASOURCE_URL` com `${DATABASE_HOST}` — elas derrubam o boot. Use só `DATABASE_URL` do Neon.
+
+Opcional: `ADMIN_EMAIL` / `ADMIN_PASSWORD` se não quiser os defaults do seed.
 
 **Vercel (front):** estático em `frontend/`. O `vercel.json` faz proxy de `/api/*` para o Render (Java não roda na Vercel).
 
