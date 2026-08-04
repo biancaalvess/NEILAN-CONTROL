@@ -17,12 +17,12 @@ const PAGE_TITLES = {
 };
 
 const BOTTOM_NAV = [
-    { href: 'index.html', label: 'Início' },
-    { href: 'registrar.html', label: 'Registrar' },
-    { href: 'servicos.html', label: 'Histórico' },
-    { href: 'custos.html', label: 'Custos' },
-    { href: 'relatorio.html', label: 'Relatórios' },
-    { href: 'configuracao.html', label: 'Config' }
+    { href: 'index.html', label: 'Início', short: 'Início' },
+    { href: 'registrar.html', label: 'Registrar', short: 'Novo' },
+    { href: 'servicos.html', label: 'Histórico', short: 'Feitos' },
+    { href: 'custos.html', label: 'Custos', short: 'Custos' },
+    { href: 'relatorio.html', label: 'Relatórios', short: 'Relat.' },
+    { href: 'configuracao.html', label: 'Config', short: 'Config' }
 ];
 
 function closeSidebar() {
@@ -74,11 +74,14 @@ async function initLayout(activePath) {
 
     const bottomNav = document.getElementById('bottom-nav');
     if (bottomNav) {
-        bottomNav.innerHTML = BOTTOM_NAV.map(item => `
-            <a href="${item.href}" class="bottom-nav-item ${activePath === item.href || (item.href === 'relatorio.html' && activePath.startsWith('relatorio')) ? 'active' : ''}">
-                <span class="bottom-nav-label">${item.label}</span>
-            </a>
-        `).join('');
+        bottomNav.innerHTML = BOTTOM_NAV.map(item => {
+            const active = activePath === item.href
+                || (item.href === 'relatorio.html' && activePath.startsWith('relatorio'));
+            return `
+            <a href="${item.href}" class="bottom-nav-item ${active ? 'active' : ''}" aria-current="${active ? 'page' : 'false'}">
+                <span class="bottom-nav-label" data-full="${item.label}" data-short="${item.short}">${item.short}</span>
+            </a>`;
+        }).join('');
     }
 
     const sidebar = document.getElementById('sidebar');
